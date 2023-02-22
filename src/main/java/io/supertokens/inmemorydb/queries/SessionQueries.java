@@ -164,6 +164,8 @@ public class SessionQueries {
     }
 
     public static SessionInfo getSession(Start start, String sessionHandle) throws SQLException, StorageQueryException {
+        // BSC grs 4: the whole session can be picked based on sessionHandle.
+        // BSC db1: get session fro sessionInfo table.
         String QUERY = "SELECT session_handle, user_id, refresh_token_hash_2, session_data, expires_at, "
                 + "created_at_time, jwt_user_payload FROM " + Config.getConfig(start).getSessionInfoTable()
                 + " WHERE session_handle = ?";

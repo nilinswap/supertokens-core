@@ -146,6 +146,7 @@ public class Webserver extends ResourceDistributor.SingletonResource {
         tomcatReference = new TomcatReference(tomcat, context);
 
         try {
+            // BSC c1 4: setupRoutes
             setupRoutes();
         } catch (Exception e) {
             Logging.error(main, null, false, e);
@@ -156,6 +157,7 @@ public class Webserver extends ResourceDistributor.SingletonResource {
     private void setupRoutes() throws Exception {
         addAPI(new NotFoundAPI(main));
         addAPI(new HelloAPI(main));
+        // BSC c1 5: adds api to tomcatReference to the server
         addAPI(new SessionAPI(main));
         addAPI(new VerifySessionAPI(main));
         addAPI(new RefreshSessionAPI(main));

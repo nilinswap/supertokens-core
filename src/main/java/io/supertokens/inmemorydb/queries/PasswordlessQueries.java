@@ -84,6 +84,7 @@ public class PasswordlessQueries {
             PasswordlessCode code) throws StorageTransactionLogicException, StorageQueryException {
         start.startTransaction(con -> {
             Connection sqlCon = (Connection) con.getConnection();
+            // BSC rsc 4: deviceId is taken from generated code
             try {
                 String QUERY = "INSERT INTO " + getConfig(start).getPasswordlessDevicesTable()
                         + "(device_id_hash, email, phone_number, link_code_salt, failed_attempts)"
@@ -271,6 +272,7 @@ public class PasswordlessQueries {
 
     public static void createUser(Start start, UserInfo user)
             throws StorageTransactionLogicException, StorageQueryException {
+        // BSC rscc1 7: create user and also create session
         start.startTransaction(con -> {
             Connection sqlCon = (Connection) con.getConnection();
             try {

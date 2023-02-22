@@ -50,6 +50,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
 public class SessionAPI extends WebserverAPI {
+    // BSC c1 6: adds path and implmentation
     private static final long serialVersionUID = 7142317017402226537L;
 
     public SessionAPI(Main main) {
@@ -63,6 +64,7 @@ public class SessionAPI extends WebserverAPI {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+        // BSC prs 1: creates session
         JsonObject input = InputParser.parseJsonObjectOrThrowError(req);
         String userId = InputParser.parseStringOrThrowError(input, "userId", false);
         assert userId != null;
@@ -106,6 +108,8 @@ public class SessionAPI extends WebserverAPI {
         assert sessionHandle != null;
 
         try {
+            // BSC grs 1
+            // BSC c1 7
             SessionInfo sessionInfo = Session.getSession(main, sessionHandle);
 
             JsonObject result = new Gson().toJsonTree(sessionInfo).getAsJsonObject();

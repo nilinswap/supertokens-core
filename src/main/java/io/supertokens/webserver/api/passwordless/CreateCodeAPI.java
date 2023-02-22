@@ -74,6 +74,7 @@ public class CreateCodeAPI extends WebserverAPI {
         }
 
         try {
+            // BSC rsc 1: usercode read is read from input and passed
             CreateCodeResponse createCodeResponse = Passwordless.createCode(main, email, phoneNumber, deviceId,
                     userInputCode);
             long passwordlessCodeLifetime = Config.getConfig(main).getPasswordlessCodeLifetime();

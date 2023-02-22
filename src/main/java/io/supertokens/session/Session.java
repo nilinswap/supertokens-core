@@ -67,8 +67,10 @@ public class Session {
             throws NoSuchAlgorithmException, UnsupportedEncodingException, StorageQueryException, InvalidKeyException,
             InvalidKeySpecException, StorageTransactionLogicException, SignatureException, IllegalBlockSizeException,
             BadPaddingException, InvalidAlgorithmParameterException, NoSuchPaddingException {
+        // BSC prs 2: creates sessionHandle, which is later used to gather user
         String sessionHandle = UUID.randomUUID().toString();
         String antiCsrfToken = enableAntiCsrf ? UUID.randomUUID().toString() : null;
+        // BSC prs 3: creates tokens
         final TokenInfo refreshToken = RefreshToken.createNewRefreshToken(main, sessionHandle, userId, null,
                 antiCsrfToken);
 
@@ -76,6 +78,7 @@ public class Session {
                 Utils.hashSHA256(refreshToken.token), null, userDataInJWT, antiCsrfToken, System.currentTimeMillis(),
                 null);
 
+        // BSC prs 4: saves the session
         StorageLayer.getSessionStorage(main).createNewSession(sessionHandle, userId,
                 Utils.hashSHA256(Utils.hashSHA256(refreshToken.token)), userDataInDatabase, refreshToken.expiry,
                 userDataInJWT, refreshToken.createdTime); // TODO: add lmrt to database
@@ -143,6 +146,7 @@ public class Session {
             boolean enableAntiCsrf, Boolean doAntiCsrfCheck) throws StorageQueryException,
             StorageTransactionLogicException, TryRefreshTokenException, UnauthorisedException {
 
+        // BSC rsv 2: get accessToken
         AccessTokenInfo accessToken = AccessToken.getInfoFromAccessToken(main, token,
                 doAntiCsrfCheck && enableAntiCsrf);
 
@@ -153,6 +157,7 @@ public class Session {
 
         io.supertokens.pluginInterface.session.SessionInfo sessionInfoForBlacklisting = null;
         if (Config.getConfig(main).getAccessTokenBlacklisting()) {
+            // BSC rsv 3: getSession based on sessionHandle. Now you can follow from BSC grs
             sessionInfoForBlacklisting = StorageLayer.getSessionStorage(main).getSession(accessToken.sessionHandle);
             if (sessionInfoForBlacklisting == null) {
                 throw new UnauthorisedException("Either the session has ended or has been blacklisted");
@@ -332,11 +337,13 @@ public class Session {
                             storage.commitTransaction(con);
                             throw new UnauthorisedException("Session missing in db or has expired");
                         }
-
+                        // BSC rsr 1: refresh token is compared with Session's refreshToken this is the verification part.
                         if (sessionInfo.refreshTokenHash2.equals(Utils.hashSHA256(Utils.hashSHA256(refreshToken)))) {
                             // at this point, the input refresh token is the parent one.
                             storage.commitTransaction(con);
                             String antiCsrfToken = enableAntiCsrf ? UUID.randomUUID().toString() : null;
+                            // BSC rsr 2: new refreshToken and new accessToken are created and are sent in the response
+                            // WITHOUT saving in db. it is saved in db when session/veriy is called again with new RT,AT
                             final TokenInfo newRefreshToken = RefreshToken.createNewRefreshToken(main, sessionHandle,
                                     sessionInfo.userId, Utils.hashSHA256(refreshToken), antiCsrfToken);
 
@@ -519,6 +526,7 @@ public class Session {
      */
     public static io.supertokens.pluginInterface.session.SessionInfo getSession(Main main, String sessionHandle)
             throws StorageQueryException, UnauthorisedException {
+        // BSC grs 2: pass queryparams and get sessionInfo object - which contains RT and userData to name some
         io.supertokens.pluginInterface.session.SessionInfo session = StorageLayer.getSessionStorage(main)
                 .getSession(sessionHandle);
 

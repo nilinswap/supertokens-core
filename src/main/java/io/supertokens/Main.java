@@ -103,6 +103,7 @@ public class Main {
             if (Main.isTesting) {
                 System.out.println("Process ID: " + this.getProcessId());
             }
+            // BSC c1 2: insert INIT State in history
             ProcessState.getInstance(this).addState(ProcessState.PROCESS_STATE.INIT, null);
             try {
                 try {
@@ -112,9 +113,11 @@ public class Main {
                     ProcessState.getInstance(this).addState(ProcessState.PROCESS_STATE.INIT_FAILURE, e);
                     throw e;
                 }
+                // BSC c1 3: Start the server
                 ProcessState.getInstance(this).addState(ProcessState.PROCESS_STATE.STARTED, null);
                 putMainThreadToSleep();
 
+                // BSC c1 n-2: shut down the server
                 ProcessState.getInstance(this).addState(ProcessState.PROCESS_STATE.SHUTTING_DOWN, null);
                 stopApp();
 
@@ -126,6 +129,7 @@ public class Main {
                 Logging.error(this, "What caused the crash: " + e.getMessage(), true, e);
                 exitCode = 1;
             }
+            // BSC c1 n-1: insert STOP State in history
             ProcessState.getInstance(this).addState(ProcessState.PROCESS_STATE.STOPPED, null);
         } finally {
             synchronized (shutdownHookLock) {
@@ -209,6 +213,7 @@ public class Main {
         PasswordHashing.init(this);
 
         // start web server to accept incoming traffic
+        // BSC c1 1: start server
         Webserver.getInstance(this).start();
 
         // this is a sign to the controlling script that this process has started.

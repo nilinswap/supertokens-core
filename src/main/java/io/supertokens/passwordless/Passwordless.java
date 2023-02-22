@@ -63,8 +63,10 @@ public class Passwordless {
             @Nullable String userInputCode) throws RestartFlowException, DuplicateLinkCodeHashException,
             StorageQueryException, NoSuchAlgorithmException, InvalidKeyException, IOException, Base64EncodingException {
         PasswordlessSQLStorage passwordlessStorage = StorageLayer.getPasswordlessStorage(main);
+        // BSC rsc 1.5: if deviceId == Null vs not
         if (deviceId == null) {
             while (true) {
+                // BSC rsc 2: actual creation of code and pass the code on.
                 CreateCodeInfo info = CreateCodeInfo.generate(userInputCode);
                 try {
                     passwordlessStorage.createDeviceWithCode(email, phoneNumber, info.linkCodeSalt.encode(), info.code);
@@ -78,16 +80,18 @@ public class Passwordless {
             }
         } else {
             PasswordlessDeviceId parsedDeviceId = PasswordlessDeviceId.decodeString(deviceId);
-
+            // BSC rsc 2 1 (found that we need to branch therefore rsc 2 in place of rsc. if you are coming from rsc 1,
+            // then go to above rsc.)
+            // : if not null deviceid then get the device from the db
             PasswordlessDevice device = passwordlessStorage.getDevice(parsedDeviceId.getHash().encode());
             if (device == null) {
                 throw new RestartFlowException();
             }
             while (true) {
+                // BSC rsc 2 2: since we have deviceId, we call a different generate
                 CreateCodeInfo info = CreateCodeInfo.generate(userInputCode, deviceId, device.linkCodeSalt);
                 try {
                     passwordlessStorage.createCode(info.code);
-
                     return info.resp;
                 } catch (DuplicateLinkCodeHashException e) {
                     if (userInputCode != null) {
@@ -197,7 +201,8 @@ public class Passwordless {
         if (!deviceIdHash.encode().equals(deviceIdHashFromUser)) {
             throw new DeviceIdHashMismatchException();
         }
-
+        // BSC rscc1 1: get linkcode and get deviceId (if one is not there, use other to get it but GET!!) and
+        // consume code with both of them
         PasswordlessDevice consumedDevice;
         try {
             consumedDevice = passwordlessStorage.startTransaction(con -> {
@@ -205,17 +210,18 @@ public class Passwordless {
                 if (device == null) {
                     throw new StorageTransactionLogicException(new RestartFlowException());
                 }
-                if (device.failedAttempts >= maxCodeInputAttempts) {
+                if (device.failedAttempts >= maxCodeInputAttempts) { // BSC rscc1 2: max retry failed attempt check
                     // This can happen if the configured maxCodeInputAttempts changes
                     passwordlessStorage.deleteDevice_Transaction(con, deviceIdHash.encode());
                     passwordlessStorage.commitTransaction(con);
                     throw new StorageTransactionLogicException(new RestartFlowException());
                 }
-
+                // BSC rscc1 3
                 PasswordlessCode code = passwordlessStorage.getCodeByLinkCodeHash_Transaction(con,
                         linkCodeHash.encode());
                 if (code == null || code.createdAt < System.currentTimeMillis() - passwordlessCodeLifetime) {
                     if (deviceId != null) {
+                        // BSC rscc1 4
                         // If we get here, it means that the user tried to use a userInputCode, but it was incorrect or
                         // the code expired. This means that we need to increment failedAttempts or clean up the device
                         // if it would exceed the configured max.
@@ -262,7 +268,8 @@ public class Passwordless {
             throw e;
         }
 
-        // Getting here means that we successfully consumed the code
+        // BSC rscc1 5
+        // Getting here means that we successfully consumed the code and we want userInfo to send in response
         UserInfo user = consumedDevice.email != null ? passwordlessStorage.getUserByEmail(consumedDevice.email)
                 : passwordlessStorage.getUserByPhoneNumber(consumedDevice.phoneNumber);
         if (user == null) {
@@ -271,6 +278,7 @@ public class Passwordless {
                     String userId = Utils.getUUID();
                     long timeJoined = System.currentTimeMillis();
                     user = new UserInfo(userId, consumedDevice.email, consumedDevice.phoneNumber, timeJoined);
+                    // BSC rscc1 6 - create user and session
                     passwordlessStorage.createUser(user);
                     return new ConsumeCodeResponse(true, user);
                 } catch (DuplicateEmailException | DuplicatePhoneNumberException e) {
@@ -486,6 +494,7 @@ public class Passwordless {
         private CreateCodeInfo(String codeId, String deviceId, String deviceIdHash, String linkCode,
                 PasswordlessLinkCodeSalt linkCodeSalt, String linkCodeHash, String userInputCode, Long createdAt) {
             this.linkCodeSalt = linkCodeSalt;
+            // BSC rsc 2 4: we just generate code, not everything unlike BSC rsc 4
             this.code = new PasswordlessCode(codeId, deviceIdHash, linkCodeHash, createdAt);
             this.resp = new CreateCodeResponse(deviceIdHash, codeId, deviceId, userInputCode, linkCode, createdAt);
         }
@@ -528,7 +537,7 @@ public class Passwordless {
             String linkCodeHashStr = linkCode.getHash().encode();
 
             long createdAt = System.currentTimeMillis();
-
+            // BSC rsc 2 3
             return new CreateCodeInfo(codeId, deviceIdStr, deviceIdHash, linkCodeStr, linkCodeSalt, linkCodeHashStr,
                     userInputCode, createdAt);
         }

@@ -66,6 +66,7 @@ public class VerifySessionAPI extends WebserverAPI {
         assert enableAntiCsrf != null;
 
         try {
+            // BSC rsv 1
             SessionInformationHolder sessionInfo = Session.getSession(main, accessToken, antiCsrfToken, enableAntiCsrf,
                     doAntiCsrfCheck);
 
