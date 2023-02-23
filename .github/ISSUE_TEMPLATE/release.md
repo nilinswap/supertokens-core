@@ -44,9 +44,15 @@ labels:
     - [ ] check FDI list
  - [ ] [supertokens-android:X.Y](https://github.com/supertokens/supertokens-android/X.Y)
     - [ ] check FDI list 
+ - [ ] [supertokens-ios:X.Y](https://github.com/supertokens/supertokens-ios/X.Y)
+    - [ ] check FDI list   
+ - [ ] [supertokens-flutter:X.Y](https://github.com/supertokens/supertokens-flutter/X.Y)
+    - [ ] check FDI list   
+ - [ ] [supertokens-dashboard](https://github.com/supertokens/dashboard)
 
 ### Others
 
+-  [ ] Example apps in create-supertokens-app CLI
  - [ ] Examples apps in supertokens-auth-react
  - [ ] Examples apps in supertokens-web-js
  - [ ] Examples apps in supertokens-react-native
@@ -54,12 +60,15 @@ labels:
  - [ ] Examples apps in supertokens-python
  - [ ] Examples apps in supertokens-node
  - [ ] Examples apps in android
+ - [ ] Example apps in ios 
+ - [ ] Example apps in flutter 
  - [ ] [next.js:canary](https://github.com/supertokens/next.js/tree/canary/examples/with-supertokens)
  - [ ] RedwoodJS and playground-auth
  - [ ] Run on netlify (and hence AWS lambda) to check if it works fine there
  - [ ] Test on vercel (with-emailpassword-vercel app) 
  - [ ] SuperTokens Jackson SAML example update
- - [ ] Supabase example app
+ - [ ] Supabase docs
+ - [ ] Capacitor template app: https://github.com/RobSchilderr/capacitor-supertokens-nextjs-turborepo
 
 ### 📚 Documentation (test site)
 
@@ -97,8 +106,11 @@ labels:
       ```
     - [ ] Update SaaS config
     - [ ] Update to tables checked for user count / or to know if a deployment is being used or not
+    - [ ] Update logic for deleting all data in dev env if a new table was added and if the data should be removed from it too
     - [ ] Update logic for exporting csv file for registered users
     - [ ] Update SaaS instances to use the latest docker images.
+    - [ ] Change [checklist in contributing guide for which tables to pick when migrating data from dev to prod instance](https://test.supertokens.com/docs/contribute/checklists/saas/tables-to-consider-for-data-migration-dev-to-prod).
+    - [ ] Update license key used for cores to include nea feature.
  - [ ] [supertokens-node:X.Y](https://github.com/supertokens/supertokens-node/tree/X.Y)
  - [ ] [supertokens-golang:X.Y](https://github.com/supertokens/supertokens-golang/tree/X.Y)
  - [ ] [supertokens-website:X.Y](https://github.com/supertokens/supertokens-website/tree/X.Y)
@@ -107,7 +119,9 @@ labels:
  - [ ] [supertokens-python:X.Y](https://github.com/supertokens/supertokens-python/tree/X.Y)
  - [ ] [supertokens-react-native:X.Y](https://github.com/supertokens/supertokens-react-native/X.Y)
  - [ ] [supertokens-android:X.Y](https://github.com/supertokens/supertokens-android/X.Y)
-
+ - [ ] [supertokens-ios:X.Y](https://github.com/supertokens/supertokens-ios/X.Y)
+ - [ ] [supertokens-flutter:X.Y](https://github.com/supertokens/supertokens-flutter/X.Y)
+-  [ ] [supertokens-dashboard](https://github.com/supertokens/dashboard)
 
 ### 📚 Documentation
 
@@ -117,6 +131,8 @@ labels:
 - [ ] Update frontend-driver-interface repo
 - [ ] Updated swaggerhub CDI spec
 - [ ] Update core-driver-interface-repo
+- [ ] Updated dashboard spec on swaggerhub
+- [ ] Update [dashboard spec](https://github.com/supertokens/dashboard/blob/master/api_spec.yaml)
 - [ ] Update internal contributing guide to move from previous core version to the latest one
 - [ ] Algolia search update for docs
 - [ ] robots.txt, sitemap.xml, noindex page update
@@ -134,3 +150,6 @@ labels:
    - [ ] supertokens-auth-react
    - [ ] supertokens-react-native
    - [ ] supertokens-android
+   - [ ] supertokens-ios
+   - [ ] supertokens-flutter
+   - [ ] supertokens-dashboard

@@ -18,6 +18,7 @@ package io.supertokens.webserver;
 
 import io.supertokens.Main;
 import io.supertokens.OperatingSystem;
+import io.supertokens.ProcessState;
 import io.supertokens.ResourceDistributor;
 import io.supertokens.cliOptions.CLIOptions;
 import io.supertokens.config.Config;
@@ -25,6 +26,12 @@ import io.supertokens.exceptions.QuitProgramException;
 import io.supertokens.output.Logging;
 import io.supertokens.webserver.api.core.UsersAPI;
 import io.supertokens.webserver.api.core.UsersCountAPI;
+import io.supertokens.webserver.api.dashboard.DashboardSignInAPI;
+import io.supertokens.webserver.api.dashboard.DashboardUserAPI;
+import io.supertokens.webserver.api.dashboard.GetDashboardSessionsForUserAPI;
+import io.supertokens.webserver.api.dashboard.GetDashboardUsersAPI;
+import io.supertokens.webserver.api.dashboard.RevokeSessionAPI;
+import io.supertokens.webserver.api.dashboard.VerifyDashboardUserSessionAPI;
 import io.supertokens.webserver.api.core.*;
 import io.supertokens.webserver.api.emailpassword.UserAPI;
 import io.supertokens.webserver.api.emailpassword.*;
@@ -48,13 +55,17 @@ import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
+import org.apache.catalina.filters.RemoteAddrFilter;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.util.descriptor.web.FilterDef;
+import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 
 import java.io.File;
 import java.util.UUID;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
+import java.util.regex.PatternSyntaxException;
 
 public class Webserver extends ResourceDistributor.SingletonResource {
 
@@ -111,9 +122,9 @@ public class Webserver extends ResourceDistributor.SingletonResource {
 
         // set thread pool size and port
         Connector connector = new Connector();
-        connector.setAttribute("maxThreads", Config.getConfig(main).getMaxThreadPoolSize());
+        connector.setProperty("maxThreads", Config.getConfig(main).getMaxThreadPoolSize() + "");
         connector.setPort(Config.getConfig(main).getPort(main));
-        connector.setAttribute("address", Config.getConfig(main).getHost(main));
+        connector.setProperty("address", Config.getConfig(main).getHost(main));
 
         tomcat.setConnector(connector);
 
@@ -127,6 +138,9 @@ public class Webserver extends ResourceDistributor.SingletonResource {
         // the amount of time for which we should wait for all requests to finish when
         // calling stop
         context.setUnloadDelay(5000);
+
+        // we add remote address filter so that only certain IPs can query the core.
+        addRemoteAddressFilter(context, main);
 
         // start tomcat
         try {
@@ -154,8 +168,43 @@ public class Webserver extends ResourceDistributor.SingletonResource {
         }
     }
 
+    private void addRemoteAddressFilter(StandardContext context, Main main) {
+        String allow = Config.getConfig(main).getIpAllowRegex();
+        String deny = Config.getConfig(main).getIpDenyRegex();
+        if (allow == null && deny == null) {
+            return;
+        }
+        ProcessState.getInstance(main).addState(ProcessState.PROCESS_STATE.ADDING_REMOTE_ADDRESS_FILTER, null);
+        RemoteAddrFilter filter = new RemoteAddrFilter();
+        if (allow != null) {
+            try {
+                filter.setAllow(allow);
+            } catch (PatternSyntaxException e) {
+                throw new QuitProgramException("Provided regular expression is invalid for ip_allow_regex config");
+            }
+        }
+        if (deny != null) {
+            try {
+                filter.setDeny(deny);
+            } catch (PatternSyntaxException e) {
+                throw new QuitProgramException("Provided regular expression is invalid for ip_deny_regex config");
+            }
+        }
+        filter.setDenyStatus(403);
+
+        FilterDef filterDefinition = new FilterDef();
+        filterDefinition.setFilter(filter);
+        filterDefinition.setFilterName(RemoteAddrFilter.class.getSimpleName());
+        context.addFilterDef(filterDefinition);
+
+        FilterMap filterMapping = new FilterMap();
+        filterMapping.setFilterName(RemoteAddrFilter.class.getSimpleName());
+        filterMapping.addURLPattern("*");
+        context.addFilterMap(filterMapping);
+    }
+
     private void setupRoutes() throws Exception {
-        addAPI(new NotFoundAPI(main));
+        addAPI(new NotFoundOrHelloAPI(main));
         addAPI(new HelloAPI(main));
         // BSC c1 5: adds api to tomcatReference to the server
         addAPI(new SessionAPI(main));
@@ -207,6 +256,15 @@ public class Webserver extends ResourceDistributor.SingletonResource {
         addAPI(new UserIdMappingAPI(main));
         addAPI(new RemoveUserIdMappingAPI(main));
         addAPI(new UpdateExternalUserIdInfoAPI(main));
+        addAPI(new ImportUserWithPasswordHashAPI(main));
+        addAPI(new LicenseKeyAPI(main));
+        addAPI(new EEFeatureFlagAPI(main));
+        addAPI(new DashboardUserAPI(main));
+        addAPI(new VerifyDashboardUserSessionAPI(main));
+        addAPI(new DashboardSignInAPI(main));
+        addAPI(new RevokeSessionAPI(main));
+        addAPI(new GetDashboardUsersAPI(main));
+        addAPI(new GetDashboardSessionsForUserAPI(main));
         // deprecated APIs:
         addAPI(new RecipeRouter(main, new io.supertokens.webserver.api.emailpassword.UsersAPI(main),
                 new io.supertokens.webserver.api.thirdparty.UsersAPI(main)));
@@ -220,6 +278,8 @@ public class Webserver extends ResourceDistributor.SingletonResource {
 
         tomcat.addServlet(CONTEXT_PATH, api.getPath(), api);
         context.addServletMappingDecoded(api.getPath(), api.getPath());
+        // add an additional mapping for the same api so that trailing slashes also work
+        context.addServletMappingDecoded(api.getPath() + "/", api.getPath());
     }
 
     public void stop() {

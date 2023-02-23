@@ -17,10 +17,10 @@
 package io.supertokens.test;
 
 import com.google.gson.JsonObject;
-import io.supertokens.config.Config;
 import io.supertokens.ProcessState;
 import io.supertokens.ProcessState.EventAndException;
 import io.supertokens.ProcessState.PROCESS_STATE;
+import io.supertokens.config.Config;
 import io.supertokens.exceptions.QuitProgramException;
 import io.supertokens.httpRequest.HttpRequest;
 import io.supertokens.httpRequest.HttpResponseException;
@@ -31,6 +31,9 @@ import io.supertokens.webserver.InputParser;
 import io.supertokens.webserver.RecipeRouter;
 import io.supertokens.webserver.Webserver;
 import io.supertokens.webserver.WebserverAPI;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
@@ -38,9 +41,6 @@ import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.mockito.Mockito;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetAddress;
@@ -490,31 +490,62 @@ public class WebserverTest extends Mockito {
     }
 
     private void hello(String hostName, String port) throws InterruptedException, IOException, HttpResponseException {
-        String[] args = { "../" };
-        TestingProcess process = TestingProcessManager.start(args);
-        assertNotNull(process.checkOrWaitForEvent(PROCESS_STATE.STARTED));
-        try {
+        {
+            String[] args = { "../" };
+            TestingProcess process = TestingProcessManager.start(args);
+            assertNotNull(process.checkOrWaitForEvent(PROCESS_STATE.STARTED));
+            try {
 
-            String response = HttpRequest.sendGETRequest(process.getProcess(), "",
-                    "http://" + hostName + ":" + port + "/hello", null, 1000, 1000, null);
-            assertEquals("Hello", response);
+                String response = HttpRequest.sendGETRequest(process.getProcess(), "",
+                        "http://" + hostName + ":" + port + "/hello", null, 1000, 1000, null);
+                assertEquals("Hello", response);
 
-            response = HttpRequest.sendJsonPOSTRequest(process.getProcess(), "",
-                    "http://" + hostName + ":" + port + "/hello", null, 1000, 1000, null);
-            assertEquals("Hello", response);
+                response = HttpRequest.sendJsonPOSTRequest(process.getProcess(), "",
+                        "http://" + hostName + ":" + port + "/hello", null, 1000, 1000, null);
+                assertEquals("Hello", response);
 
-            response = HttpRequest.sendJsonPUTRequest(process.getProcess(), "",
-                    "http://" + hostName + ":" + port + "/hello", null, 1000, 1000, null);
-            assertEquals("Hello", response);
+                response = HttpRequest.sendJsonPUTRequest(process.getProcess(), "",
+                        "http://" + hostName + ":" + port + "/hello", null, 1000, 1000, null);
+                assertEquals("Hello", response);
 
-            response = HttpRequest.sendJsonDELETERequest(process.getProcess(), "",
-                    "http://" + hostName + ":" + port + "/hello", null, 1000, 1000, null);
-            assertEquals("Hello", response);
+                response = HttpRequest.sendJsonDELETERequest(process.getProcess(), "",
+                        "http://" + hostName + ":" + port + "/hello", null, 1000, 1000, null);
+                assertEquals("Hello", response);
 
-        } finally {
-            process.kill();
-            assertNotNull(process.checkOrWaitForEvent(PROCESS_STATE.STOPPED));
+            } finally {
+                process.kill();
+                assertNotNull(process.checkOrWaitForEvent(PROCESS_STATE.STOPPED));
+            }
         }
+
+        {
+            String[] args = { "../" };
+            TestingProcess process = TestingProcessManager.start(args);
+            assertNotNull(process.checkOrWaitForEvent(PROCESS_STATE.STARTED));
+            try {
+
+                String response = HttpRequest.sendGETRequest(process.getProcess(), "",
+                        "http://" + hostName + ":" + port + "/", null, 1000, 1000, null);
+                assertEquals("Hello", response);
+
+                response = HttpRequest.sendJsonPOSTRequest(process.getProcess(), "", "http://" + hostName + ":" + port,
+                        null, 1000, 1000, null);
+                assertEquals("Hello", response);
+
+                response = HttpRequest.sendJsonPUTRequest(process.getProcess(), "",
+                        "http://" + hostName + ":" + port + "/", null, 1000, 1000, null);
+                assertEquals("Hello", response);
+
+                response = HttpRequest.sendJsonDELETERequest(process.getProcess(), "",
+                        "http://" + hostName + ":" + port, null, 1000, 1000, null);
+                assertEquals("Hello", response);
+
+            } finally {
+                process.kill();
+                assertNotNull(process.checkOrWaitForEvent(PROCESS_STATE.STOPPED));
+            }
+        }
+
     }
 
     @Test

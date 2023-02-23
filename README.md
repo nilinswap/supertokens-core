@@ -5,6 +5,7 @@
 <a href="https://supertokens.io/discord">
 <img src="https://img.shields.io/discord/603466164219281420.svg?logo=discord"
     alt="chat on Discord"></a>
+<span><img src="https://img.shields.io/docker/pulls/supertokens/supertokens-postgresql.svg" alt="Docker pull stats"/></span>
 
 Add **secure login and session management** to your apps. [SDKs available](https://supertokens.com/docs/community/sdks) for popular languages and front-end frameworks e.g. Node.js, Go, Python, React.js, React Native, Vanilla JS, etc.
 
@@ -193,12 +194,28 @@ Mihály Lengyel</b></sub></a></td>
 <td align="center"><a href="https://github.com/ITenthusiasm"><img src="https://avatars.githubusercontent.com/u/47364027?v=4" width="100px;" alt=""/><br /><sub><b>Isaiah Thomason</b></sub></a></td>
 <td align="center"><a href="https://github.com/utsavdotpro"><img src="https://avatars.githubusercontent.com/u/38961422?v=4" width="100px;" alt=""/><br /><sub><b>Utsav Barnwal</b></sub></a></td>
   </tr>
+  <tr>
+<td align="center"><a href="https://github.com/saurabhghatnekar"><img src="https://avatars.githubusercontent.com/u/20884782?v=4" width="100px;" alt=""/><br /><sub><b>Saurabh Ghatnekar</b></sub></a></td>
+<td align="center"><a href="https://github.com/alisher-aituarov"><img src="https://avatars.githubusercontent.com/u/63276190?v=4" width="100px;" alt=""/><br /><sub><b>Alisher Aituarov</b></sub></a></td>
+<td align="center"><a href="https://github.com/wallstromsimon"><img src="https://avatars.githubusercontent.com/u/3397398?v=4" width="100px;" alt=""/><br /><sub><b>Simon Kihlberg Wallstrom</b></sub></a></td>
+<td align="center"><a href="https://github.com/AreebKhan619"><img src="https://avatars.githubusercontent.com/u/39133435?v=4" width="100px;" alt=""/><br /><sub><b>Areeb Khan</b></sub></a></td>
+  </tr>
+  <tr>
+<td align="center"><a href="https://github.com/sublimator"><img src="https://avatars.githubusercontent.com/u/525211?v=4" width="100px;" alt=""/><br /><sub><b>Nicholas Dudfield</b></sub></a></td>
+  </tr>
 </table>
 
 ## 👩‍💻 Contributing
 Please see the [CONTRIBUTING.md](https://github.com/supertokens/supertokens-core/blob/master/CONTRIBUTING.md) file for instructions.
 
 ## 📝 License
-&copy; 2020 SuperTokens Inc and its contributors. All rights reserved.
+&copy; 2020-2023 SuperTokens Inc and its contributors. All rights reserved.
 
-Licensed under the Apache 2.0 license.
+Portions of this software are licensed as follows:
+
+* All content that resides under the "ee/" directory of this repository, if that directory exists, is licensed under the
+  license defined in "ee/LICENSE.md".
+* All third party components incorporated into the SuperTokens Software are licensed under the original license provided
+  by the owner of the applicable component.
+* Content outside of the above mentioned directories or restrictions above is available under the "Apache 2.0"
+  license as defined in the level "LICENSE.md" file

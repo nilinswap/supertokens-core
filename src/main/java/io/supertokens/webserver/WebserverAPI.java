@@ -20,12 +20,13 @@ import com.google.gson.JsonElement;
 import io.supertokens.Main;
 import io.supertokens.config.Config;
 import io.supertokens.exceptions.QuitProgramException;
+import io.supertokens.featureflag.exceptions.FeatureNotEnabledException;
 import io.supertokens.output.Logging;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -47,10 +48,13 @@ public abstract class WebserverAPI extends HttpServlet {
         supportedVersions.add("2.13");
         supportedVersions.add("2.14");
         supportedVersions.add("2.15");
+        supportedVersions.add("2.16");
+        supportedVersions.add("2.17");
+        supportedVersions.add("2.18");
     }
 
     public static String getLatestCDIVersion() {
-        return "2.15";
+        return "2.18";
     }
 
     public WebserverAPI(Main main, String rid) {
@@ -167,11 +171,15 @@ public abstract class WebserverAPI extends HttpServlet {
 
             if (e instanceof QuitProgramException) {
                 main.wakeUpMainThreadToShutdown();
+            } else if (e instanceof FeatureNotEnabledException) {
+                sendTextResponse(402, e.getMessage(), resp);
             } else if (e instanceof ServletException) {
                 ServletException se = (ServletException) e;
                 Throwable rootCause = se.getRootCause();
                 if (rootCause instanceof BadRequestException) {
                     sendTextResponse(400, rootCause.getMessage(), resp);
+                } else if (rootCause instanceof FeatureNotEnabledException) {
+                    sendTextResponse(402, rootCause.getMessage(), resp);
                 } else if (rootCause instanceof APIKeyUnauthorisedException) {
                     sendTextResponse(401, "Invalid API key", resp);
                 } else {
